@@ -1,9 +1,10 @@
-﻿using DevInSales.Models;
+﻿using DevInSales.Enums;
+using DevInSales.Models;
 
 namespace DevInSales.Seeds
 {
     public class ProfileSeed
     {
-        public static List<Profile> Seed { get; set; } = new List<Profile>() { new Profile(1, "Cliente", "Gerente") };
+        public static List<Profile> Seed { get; set; } = new List<Profile>() { new Profile(1, "Cliente", PermEnum.Usuario) };
     }
 }

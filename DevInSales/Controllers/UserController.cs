@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DevInSales.Controllers
 {
     [Route("api/user")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly SqlContext _context;
@@ -35,6 +37,7 @@ namespace DevInSales.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<UserResponseDTO>>> Get(
             [FromQuery] string? name, [FromQuery] string? birth_date_min, [FromQuery] string? birth_date_max)
         {
@@ -84,6 +87,7 @@ namespace DevInSales.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost]
+        [Authorize(Roles = "Gerente,Administrador")]
         public async Task<ActionResult<User>> Create([FromBody] UserCreateDTO requisicao)
         {
             try
@@ -129,6 +133,7 @@ namespace DevInSales.Controllers
         /// <response code="200">Usuário deletado.</response>
         /// <response code="404">Usuário não encontrado.</response>
         [HttpDelete("{user_id}")]
+        [Authorize(Roles = "Administrador")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteUser([FromRoute] int user_id)
