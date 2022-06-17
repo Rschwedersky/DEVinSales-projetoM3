@@ -1,3 +1,5 @@
+using DevInSales.Enums;
+using Microsoft.OpenApi.Extensions;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DevInSales.Models;
@@ -6,19 +8,19 @@ public class Profile
 {
     [Column("id")]
     public int Id { get; set; }
-    [Column("name")]
-    public string Name{ get; set; }
-    [Column("role")]
+    [Column("Role")]
     public string Role { get; set; }
+    [Column("Perm")]
+    public PermEnum Perm { get; set; }
 
     public Profile()
     {
     }
 
-    public Profile(int id, string name, string role)
+    public Profile(int id, string role, PermEnum perm)
     {
         Id = id;
-        Name = name;
+        Perm = perm;
         Role = role;
     }
 }
