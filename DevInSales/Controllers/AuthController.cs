@@ -1,13 +1,11 @@
 ﻿using DevInSales.Context;
 using DevInSales.DTOs;
 using DevInSales.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace DevInSales.Controllers
 {
-    [Route("api/auth")]
+    [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -18,59 +16,39 @@ namespace DevInSales.Controllers
             _context = context;
         }
 
-        [HttpPost("authenticate")]
-        public async Task<ActionResult> AuthenticateAsync([FromBody] UserLoginDto dto)
-
-        // TODO: validar se o dto está preenchido.
+        /// <summary>
+        /// Faz login com email e senha.
+        /// </summary>
+        /// <returns>token de autenticação</returns>
+        /// <response code="200">Registro encontrado.</response>
+        /// <response code="404">Registro não encontrado.</response>
+        [HttpPost]
+        [Route("login")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public IActionResult Login([FromBody] LoginDTO login)
         {
-            var user = await _context.User.Include(u => u.Profile)
-                .FirstOrDefaultAsync(u => u.Email == dto.Email && u.Password == dto.Password);
-
-            if (user == null) return BadRequest(new { Message = "Usuário ou senha inválidos." });
-
-            var token = TokenService.GenerateToken(user);
-
-
-            // TODO: usar o DTO >> UserResponseDTO
-            var result = new
+            try
             {
-                token,
-                User = new
+                var user = _context.User.First(x => x.Email.ToLower() == login.Email.ToLower() && x.Password.ToLower() == login.Password.ToLower());
+
+                if (user == null)
                 {
-                    user.Id,
-                    user.Name,
-                    user.Email
+                    return NotFound("User or passaword not found");
                 }
-            };
 
-            return Ok(new { result });
-        }
+                var profile = _context.Profile.First(x => x.Id == user.ProfileId);
 
-        [HttpGet("endpoint-aberto")]
-        public ActionResult EndpontAberto()
-        {
-            return Ok(new { Message = "Bem vindo ao endpoint aberto! =)" });
-        }
+                var token = TokenService.GenerateToken(user.Name, profile.Role);
 
-        [HttpGet("endpoint-usuario")]
-        [Authorize(Roles = "Usuário, Gerente, Administrador")]
-        public ActionResult EndpontUsuario()
-        {
-            return Ok(new { Message = "Bem vindo ao endpoint do usuário! =)" });
-        }
+                return Ok(new { token });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
 
-        [HttpGet("endpoint-gerente")]
-        [Authorize(Roles = "Gerente, Administrador")]
-        public ActionResult EndpontGerente()
-        {
-            return Ok(new { Message = "Bem vindo ao endpoint do gerente! =)" });
-        }
-
-        [HttpGet("endpoint-adm")]
-        [Authorize(Roles = "Administrador")]
-        public ActionResult EndpontAdm()
-        {
-            return Ok(new { Message = "Bem vindo ao endpoint do adm! =)" });
         }
     }
 }

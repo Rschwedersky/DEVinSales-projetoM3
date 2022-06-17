@@ -3,40 +3,37 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Configuration;
 
 namespace DevInSales.Services
 {
     public static class TokenService
     {
+        public static string GenerateToken(string name, string role)
+        {
+            var claims = new Claim[]
+            {
+                new Claim(ClaimTypes.Name, name),
+                new Claim(ClaimTypes.Role, role)
+            };
 
+            return GenerateToken(claims);
+        }
 
-        public static string GenerateToken(User user)
+        public static string GenerateToken(IEnumerable<Claim> Claims)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-
-        
-       
-            var secret = "fedaf7d8863b48e197b9287d492b708e";
-
-            var key = Encoding.ASCII.GetBytes(secret);
+            var key = Encoding.ASCII.GetBytes(Settings.Settings.Secret);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] {
-                    new Claim("UserId", user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Name),
-                    new Claim(ClaimTypes.Role, user.Profile.Role) 
-                })
-,
-                Expires = DateTime.UtcNow.AddHours(2),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                Subject = new ClaimsIdentity(Claims),
+                Expires = DateTime.UtcNow.AddHours(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.Aes128Encryption)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
+
             return tokenHandler.WriteToken(token);
         }
-
-
     }
 }
