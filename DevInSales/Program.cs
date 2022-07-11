@@ -22,11 +22,7 @@ builder.Services.AddSwaggerGen(opt =>
 
 builder.Services.AddDbContext<SqlContext>(opt=>opt.UseSqlServer(builder.Configuration.GetConnectionString("ServerConnection")));
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(); 
-
-var app = builder.Build();
-
-builder.Services.AddDbContext<SqlContext>(opt=>opt.UseSqlServer(builder.Configuration.GetConnectionString("ServerConnection")));
-builder.Services.AddControllersWithViews().AddNewtonsoftJson(); 
+ 
 
 var key = Encoding.ASCII.GetBytes(Settings.Secret);
 
@@ -47,6 +43,7 @@ builder.Services.AddAuthentication(o =>
     };
 });
 
+var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
